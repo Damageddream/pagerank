@@ -51,9 +51,7 @@ def crawl(directory):
 def transition_model(corpus, page, damping_factor):
     probability_distribution = {}
     for key in corpus:
-        probability_distribution[key] = probability_distribution.get(key, 0) + (
-            1 - damping_factor
-        ) / len(corpus)
+        probability_distribution[key] = probability_distribution.get(key, 0) + (1 - damping_factor) / len(corpus)
         if len(corpus[page]) == 0:
             probability_distribution[key] += damping_factor / len(corpus)
         elif key == page:
@@ -79,15 +77,34 @@ def sample_pagerank(corpus, damping_factor, n):
 
 
 def iterate_pagerank(corpus, damping_factor):
-    """
-    Return PageRank values for each page by iteratively updating
-    PageRank values until convergence.
+    pagerank = {}
+    for page in corpus:
+        pagerank[page] = 1 / len(corpus)
+    converge_pages = 0
+    while converge_pages != len(corpus):
+        converge_pages = 0
+        prev_rank = 0
+        new_rank = 0
+        for page in corpus:
+            prev_rank = pagerank[page]
+            sigma_pagerank_links = 0
+            if(len(corpus[page])==0):
+                for link in corpus:
+                    sigma_pagerank_links += pagerank[link]/len(corpus)
+            else:
+                for link in corpus[page]:
+                    sigma_pagerank_links += pagerank[link]/len(corpus[link])
+            pagerank[page] = ((1-damping_factor) / len(corpus))+(damping_factor*sigma_pagerank_links)          
+            new_rank = pagerank[page]
+            if(abs(prev_rank - new_rank) <= 0.001):
+                converge_pages += 1
+    total = sum(pagerank.values())
+    for page in pagerank:
+        pagerank[page] = round(pagerank[page] / total, 5)
+    return pagerank
 
-    Return a dictionary where keys are page names, and values are
-    their estimated PageRank value (a value between 0 and 1). All
-    PageRank values should sum to 1.
-    """
-    raise NotImplementedError
+
+
 
 
 if __name__ == "__main__":
