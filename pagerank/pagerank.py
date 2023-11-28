@@ -80,32 +80,29 @@ def iterate_pagerank(corpus, damping_factor):
     pagerank = {}
     for page in corpus:
         pagerank[page] = 1 / len(corpus)
-    converge_pages = 0
-    while converge_pages != len(corpus):
+
+    while True:
         converge_pages = 0
         prev_rank = 0
         new_rank = 0
         for page in corpus:
             prev_rank = pagerank[page]
             sigma_pagerank_links = 0
-            if(len(corpus[page])==0):
-                for link in corpus:
-                    sigma_pagerank_links += pagerank[link]/len(corpus)
-            else:
-                for link in corpus[page]:
-                    sigma_pagerank_links += pagerank[link]/len(corpus[link])
+            for link in corpus:
+                if len(corpus[link]) == 0:
+                    sigma_pagerank_links += pagerank[link] / len(corpus)
+                elif page in corpus[link]:
+                    sigma_pagerank_links += pagerank[link] / len(corpus[link])
             pagerank[page] = ((1-damping_factor) / len(corpus))+(damping_factor*sigma_pagerank_links)          
             new_rank = pagerank[page]
             if(abs(prev_rank - new_rank) <= 0.001):
                 converge_pages += 1
+        if converge_pages == len(corpus):
+            break
     total = sum(pagerank.values())
     for page in pagerank:
         pagerank[page] = round(pagerank[page] / total, 5)
     return pagerank
-
-
-
-
 
 if __name__ == "__main__":
     main()
